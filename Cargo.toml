@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+crypto = { path = "./crypto/" }
+
+[dev-dependencies]
+clippy = "0.0.302"
+rustfmt = "0.10.0"
