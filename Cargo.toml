@@ -11,3 +11,7 @@ thiserror = "1.0.64"
 
 [dev-dependencies]
 rstest = "0.23.0"
+crypto = { path = "./crypto/" }
+clippy = "0.0.302"
+rustfmt = "0.10.0"
+
