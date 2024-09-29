@@ -1,0 +1,24 @@
+FROM ubuntu:18.04
+
+RUN apt-get update && \
+    apt-get install -y openssh-server && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /var/run/sshd && \
+    useradd -m -d /home/user/ -s /bin/bash user && \
+    echo "user:1234" | chpasswd && \
+    chown -R user:user /home/user && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config    
+
+RUN mkdir /home/user/.ssh && \
+    chmod 700 /home/user/.ssh && \
+    touch /home/user/.ssh/config && \
+    echo "Host *\n\tStrictHostKeyChecking no\n\tUserKnownHostsFile=/dev/null\n" > /home/user/.ssh/config && \
+    chown -R user:user /home/user/.ssh
+
+COPY rsa_keys/id_rsa.pub /home/user/.ssh/authorized_keys
+
+RUN chmod 444 /home/user/.ssh/authorized_keys
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
