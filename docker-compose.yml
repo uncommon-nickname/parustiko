@@ -16,7 +16,6 @@ services:
 
   tests:
     image: rust:latest
-    platform: linux/amd64
     volumes:
       - .:/app/
     depends_on:
