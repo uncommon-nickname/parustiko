@@ -1,6 +1,7 @@
 version: '3'
 services:
   server:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -15,6 +16,7 @@ services:
 
   tests:
     image: rust:latest
+    platform: linux/amd64
     volumes:
       - .:/app/
     depends_on:
