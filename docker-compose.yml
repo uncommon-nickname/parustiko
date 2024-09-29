@@ -1,0 +1,32 @@
+version: '3'
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    volumes:
+      - .:/app/
+    ports:
+      - "2222:22"
+    networks:
+      network:
+        ipv4_address: 10.10.10.10
+    restart: always
+
+  tests:
+    image: rust:latest
+    volumes:
+      - .:/app/
+    depends_on:
+      - server
+    networks:
+      - network
+
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.0.0/16
+          gateway: 10.10.10.11
