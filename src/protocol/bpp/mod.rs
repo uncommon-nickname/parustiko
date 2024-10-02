@@ -1,8 +1,8 @@
-mod codec;
 mod packet;
 
 use crate::protocol::message::SSHMessageID;
 
+#[derive(Debug)]
 pub struct BinaryProtocolMessage {
     message_id: SSHMessageID,
     packet_length: u32,

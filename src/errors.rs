@@ -1,17 +1,14 @@
-use std::io::Error as IoError;
+use std::io;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ProtocolError {
-    #[error("Encoding message to bytes failed.")]
-    EncodingFailed,
+    #[error("encoding message to bytes failed: ({0})")]
+    BinaryProtocolEncodingFailed(&'static str),
 
-    #[error("Decoding message from bytes failed.")]
-    DecodingFailed,
+    #[error("decoding binary protocol from message failed: {0:?}")]
+    BinaryProtocolDecodingFailed(#[from] io::Error),
 
-    #[error("Entity preconditions are not set.")]
-    InvalidEntity,
-
-    #[error("Reading from raw buffer failed. {0:?}")]
-    ReadError(#[from] IoError),
+    #[error("entity preconditions are not met: ({0})")]
+    BinaryProtocolInvalidEntity(&'static str),
 }

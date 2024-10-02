@@ -1,7 +1,7 @@
 use num_derive::FromPrimitive;
 
 #[repr(u8)]
-#[derive(FromPrimitive)]
+#[derive(Debug, Eq, FromPrimitive, PartialEq)]
 pub enum SSHMessageID {
-    Kexinit = 20,
+    KexInit = 20,
 }

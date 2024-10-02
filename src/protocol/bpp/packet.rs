@@ -13,14 +13,26 @@ const MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES: usize = 32_768;
 const MIN_PADDING_SIZE_BYTES: u8 = 4;
 
 impl BinaryProtocolMessage {
-    pub fn new(padding_length: u8, payload: Vec<u8>, mac: Vec<u8>) -> Result<Self, ProtocolError> {
-        if payload.len() > MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES
-            || padding_length < MIN_PADDING_SIZE_BYTES
-        {
-            return Err(ProtocolError::InvalidEntity);
+    pub fn try_build(
+        padding_length: u8,
+        payload: Vec<u8>,
+        mac: Vec<u8>,
+    ) -> Result<Self, ProtocolError> {
+        if payload.len() > MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES {
+            return Err(ProtocolError::BinaryProtocolInvalidEntity(
+                "payload is too long for SSH message",
+            ));
         }
 
-        let message_id = SSHMessageID::from_u8(payload[0]).ok_or(ProtocolError::InvalidEntity)?;
+        if padding_length < MIN_PADDING_SIZE_BYTES {
+            return Err(ProtocolError::BinaryProtocolInvalidEntity(
+                "padding is too short for SSH message",
+            ));
+        }
+
+        let message_id = SSHMessageID::from_u8(payload[0]).ok_or(
+            ProtocolError::BinaryProtocolInvalidEntity("unknown SSH message ID"),
+        )?;
         let packet_length = payload.len() as u32 + padding_length as u32 + 1;
         let mac_length = mac.len() as u8;
 
@@ -58,11 +70,22 @@ impl Encode for BinaryProtocolMessage {
 
         buff.append(&mut self.mac);
 
-        Ok(buff)
+        if buff.len() != expected_buff_size {
+            Err(ProtocolError::BinaryProtocolEncodingFailed(
+                "final buffer has incorrect length",
+            ))
+        } else {
+            Ok(buff)
+        }
     }
 
     fn encoded_len(&self) -> usize {
-        size_of::<u32>() + self.packet_length as usize + self.mac.len()
+        // 4 bytes of encoded packet length.
+        size_of::<u32>() +
+        // 1 byte of encoded padding length + payload + padding
+        self.packet_length as usize +
+        // n bytes of encoded mac length
+        self.mac_length as usize
     }
 }
 
@@ -96,11 +119,64 @@ impl DecodeRaw for BinaryProtocolMessage {
             false => vec![],
         };
 
-        Self::Entity::new(padding_length, payload, mac)
+        Self::Entity::try_build(padding_length, payload, mac)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::{fixture, rstest};
+
+    #[fixture]
+    fn message() -> BinaryProtocolMessage {
+        BinaryProtocolMessage {
+            message_id: SSHMessageID::KexInit,
+            packet_length: 50,
+            padding_length: 25,
+            mac_length: 8,
+            payload: vec![0_u8; 24],
+            mac: vec![1_u8; 8],
+        }
+    }
+
+    #[rstest]
+    #[case(
+        vec![0_u8; 33_000], 25, "entity preconditions are not met: (payload is too long for SSH message)"
+    )]
+    #[case(
+        vec![0_u8; 5], 3, "entity preconditions are not met: (padding is too short for SSH message)"
+    )]
+    #[case(
+        vec![0_u8; 5], 25, "entity preconditions are not met: (unknown SSH message ID)"
+    )]
+    fn build_protocol_message_errors(
+        #[case] payload: Vec<u8>,
+        #[case] padding_length: u8,
+        #[case] err_str: &str,
+    ) {
+        let result = BinaryProtocolMessage::try_build(padding_length, payload, vec![0_u8; 5])
+            .unwrap_err()
+            .to_string();
+
+        assert_eq!(result, err_str);
+    }
+
+    #[test]
+    fn build_protocol_message() {
+        let payload = vec![20_u8, 30, 40, 50];
+        let mac = vec![0_u8; 5];
+
+        let message = BinaryProtocolMessage::try_build(020, payload, mac).unwrap();
+
+        assert_eq!(message.message_id, SSHMessageID::KexInit);
+        assert_eq!(message.packet_length, 4 + 20 + 1)
+    }
+
+    #[rstest]
+    fn build_random_padding_size(message: BinaryProtocolMessage) {
+        let pad = message.build_random_padding();
+
+        assert_eq!(message.padding_length as usize, pad.len());
+    }
 }
