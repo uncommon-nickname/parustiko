@@ -26,6 +26,6 @@ pub trait DecodeRaw {
     // Construct the entity from readable buffer.
     fn decode_from_reader<R: Read>(
         buffer: R,
-        mac_length: u8,
+        expected_tail_length: u8,
     ) -> Result<Self::Entity, ProtocolError>;
 }
