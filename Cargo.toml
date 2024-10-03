@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+num-derive = "0.4.2"
+num-traits = "0.2.19"
+rand = "0.8.5"
+thiserror = "1.0.64"
+
+[dev-dependencies]
+rstest = "0.23.0"
