@@ -1,10 +1,10 @@
 mod packet;
 
-use crate::protocol::message::SSHMessageID;
+use crate::protocol::message::SshMessageID;
 
 #[derive(Debug)]
-pub struct BinaryProtocolMessage {
-    message_id: SSHMessageID,
+pub struct BinaryProtoPacket {
+    message_id: SshMessageID,
     packet_length: u32,
     padding_length: u8,
     mac_length: u8,
