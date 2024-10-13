@@ -1,4 +1,4 @@
-use super::BinaryProtoPacket;
+use super::BinaryProtocolPacket;
 
 use crate::errors::ProtocolError;
 use crate::protocol::message::SshMessageID;
@@ -12,7 +12,7 @@ use std::mem::size_of;
 const MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES: usize = 32_768;
 const MIN_PADDING_SIZE_BYTES: u8 = 4;
 
-impl BinaryProtoPacket {
+impl BinaryProtocolPacket {
     pub fn try_build(
         padding_length: u8,
         payload: Vec<u8>,
@@ -52,7 +52,7 @@ impl BinaryProtoPacket {
     }
 }
 
-impl Encode for BinaryProtoPacket {
+impl Encode for BinaryProtocolPacket {
     // SSH protocol utilizes the network endianness, so the packets
     // should be encoded with big endian.
     fn encode_to_bytes(mut self) -> Result<Vec<u8>, ProtocolError> {
@@ -73,12 +73,12 @@ impl Encode for BinaryProtoPacket {
         buff.append(&mut self.mac);
 
         if buff.len() != expected_buff_size {
-            Err(ProtocolError::BinaryPacketEncodingFailed(
+            return Err(ProtocolError::BinaryPacketEncodingFailed(
                 "final buffer has incorrect length",
-            ))
-        } else {
-            Ok(buff)
+            ));
         }
+
+        Ok(buff)
     }
 
     fn encoded_len(&self) -> usize {
@@ -91,7 +91,7 @@ impl Encode for BinaryProtoPacket {
     }
 }
 
-impl DecodeRaw for BinaryProtoPacket {
+impl DecodeRaw for BinaryProtocolPacket {
     type Entity = Self;
 
     fn decode_from_reader<R: Read>(
@@ -115,13 +115,12 @@ impl DecodeRaw for BinaryProtoPacket {
         let mut padding = vec![0_u8; padding_length as usize];
         buffer.read_exact(&mut padding)?;
 
-        let mac = match expected_tail_length > 0 {
-            true => {
-                let mut mac = vec![0_u8; expected_tail_length as usize];
-                buffer.read_exact(&mut mac)?;
-                mac
-            }
-            false => vec![],
+        let mac = if expected_tail_length > 0 {
+            let mut mac = vec![0_u8; expected_tail_length as usize];
+            buffer.read_exact(&mut mac)?;
+            mac
+        } else {
+            vec![]
         };
 
         Self::Entity::try_build(padding_length, payload, mac)
@@ -134,8 +133,8 @@ mod tests {
     use rstest::{fixture, rstest};
 
     #[fixture]
-    fn message() -> BinaryProtoPacket {
-        BinaryProtoPacket {
+    fn message() -> BinaryProtocolPacket {
+        BinaryProtocolPacket {
             message_id: SshMessageID::KexInit,
             packet_length: 50,
             padding_length: 25,
@@ -165,7 +164,7 @@ mod tests {
         #[case] padding_length: u8,
         #[case] err_str: &str,
     ) {
-        let err = BinaryProtoPacket::try_build(padding_length, payload, vec![0_u8; 5])
+        let err = BinaryProtocolPacket::try_build(padding_length, payload, vec![0_u8; 5])
             .unwrap_err()
             .to_string();
 
@@ -180,21 +179,21 @@ mod tests {
         let payload = vec![20_u8, 30, 40, 50];
         let mac = vec![0_u8; 5];
 
-        let message = BinaryProtoPacket::try_build(020, payload, mac).unwrap();
+        let message = BinaryProtocolPacket::try_build(020, payload, mac).unwrap();
 
         assert_eq!(message.message_id, SshMessageID::KexInit);
         assert_eq!(message.packet_length, 4 + 20 + 1)
     }
 
     #[rstest]
-    fn build_random_padding_size(message: BinaryProtoPacket) {
+    fn build_random_padding_size(message: BinaryProtocolPacket) {
         let pad = message.build_random_padding();
 
         assert_eq!(message.padding_length as usize, pad.len());
     }
 
     #[rstest]
-    fn encode_to_bytes_wrong_final_length(mut message: BinaryProtoPacket) {
+    fn encode_to_bytes_wrong_final_length(mut message: BinaryProtocolPacket) {
         message.mac_length = 13;
 
         let err = message.encode_to_bytes().unwrap_err().to_string();
@@ -206,7 +205,7 @@ mod tests {
     }
 
     #[rstest]
-    fn encode_to_bytes(message: BinaryProtoPacket) {
+    fn encode_to_bytes(message: BinaryProtocolPacket) {
         let original_payload = message.payload.clone();
         let original_mac = message.mac.clone();
 
@@ -219,7 +218,7 @@ mod tests {
     }
 
     #[rstest]
-    fn calculate_encoded_length(message: BinaryProtoPacket) {
+    fn calculate_encoded_length(message: BinaryProtocolPacket) {
         let length = message.encoded_len();
 
         assert_eq!(
@@ -235,7 +234,7 @@ mod tests {
     #[case(9)] // One byte short to read padding.
     #[case(11)] // One byte short to read mac.
     fn decode_not_enough_data_in_buffer(raw_buffer: Vec<u8>, #[case] stop: usize) {
-        let err = BinaryProtoPacket::decode_from_reader(&raw_buffer[..stop], 2)
+        let err = BinaryProtocolPacket::decode_from_reader(&raw_buffer[..stop], 2)
             .unwrap_err()
             .to_string();
 
@@ -243,8 +242,8 @@ mod tests {
     }
 
     #[rstest]
-    fn decode_not_enough_data_for_padding_length(raw_buffer: Vec<u8>) {
-        let message = BinaryProtoPacket::decode_from_reader(&raw_buffer[..], 2).unwrap();
+    fn decode_buffer_into_packet_object(raw_buffer: Vec<u8>) {
+        let message = BinaryProtocolPacket::decode_from_reader(&raw_buffer[..], 2).unwrap();
 
         assert_eq!(message.message_id, SshMessageID::KexInit);
         assert_eq!(message.packet_length, 6);

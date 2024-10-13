@@ -6,7 +6,7 @@ use crate::errors::ProtocolError;
 use std::io::Read;
 
 pub trait Encode {
-    // Consume the entity and return it BE byte representation.
+    // Consume the entity and return it's BE byte representation.
     fn encode_to_bytes(self) -> Result<Vec<u8>, ProtocolError>;
 
     // Calculate the size of BE byte representation.
