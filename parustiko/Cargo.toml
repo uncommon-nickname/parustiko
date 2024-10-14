@@ -1,0 +1,17 @@
+[package]
+name = "parustiko"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+num-derive = "0.4.2"
+num-traits = "0.2.19"
+rand = "0.8.5"
+thiserror = "1.0.64"
+crypto = { path = "../crypto/" }
+
+[dev-dependencies]
+rstest = "0.23.0"
+clippy = "0.0.302"
+rustfmt = "0.10.0"
+
