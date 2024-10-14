@@ -7,5 +7,5 @@ pub enum EncryptionType {
 
 pub trait Encryption {
     fn encrypt(&self, block: &mut [u8]) -> Result<(), errors::EncryptionError>;
-    fn decrypt(&self, block: &mut [u8]) -> Result<(), errors::DencryptionError>;
+    fn decrypt(&self, block: &mut [u8]) -> Result<(), errors::DecryptionError>;
 }

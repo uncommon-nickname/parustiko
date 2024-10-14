@@ -1,4 +1,4 @@
-use super::errors::{DencryptionError, EncryptionError};
+use super::errors::{DecryptionError, EncryptionError};
 use super::Encryption;
 use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
 use aes::Aes128;
@@ -17,24 +17,34 @@ impl AES {
     }
 }
 
+impl Default for AES {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Encryption for AES {
     fn encrypt(&self, block: &mut [u8]) -> Result<(), EncryptionError> {
-        let array: &mut [u8; 16] = block
-            .try_into()
-            .map_err(|_| EncryptionError::IncorrectBlockSize("block size has to have 16 bytes"))?;
+        if block.len() != 16 {
+            return Err(EncryptionError::IncorrectBlockSize(
+                "block size has to have 16 bytes",
+            ));
+        }
 
         self.cipher
-            .encrypt_block(GenericArray::from_mut_slice(array));
+            .encrypt_block(GenericArray::from_mut_slice(block));
 
         Ok(())
     }
 
-    fn decrypt(&self, block: &mut [u8]) -> Result<(), DencryptionError> {
-        let array: &mut [u8; 16] = block
-            .try_into()
-            .map_err(|_| DencryptionError::IncorrectBlockSize("block size has to have 16 bytes"))?;
+    fn decrypt(&self, block: &mut [u8]) -> Result<(), DecryptionError> {
+        if block.len() != 16 {
+            return Err(DecryptionError::IncorrectBlockSize(
+                "block size has to have 16 bytes",
+            ));
+        }
 
-        let array = GenericArray::from_mut_slice(array);
+        let array = GenericArray::from_mut_slice(block);
         self.cipher.decrypt_block(array);
 
         Ok(())

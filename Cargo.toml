@@ -2,7 +2,3 @@
 members = ["crypto", "parustiko"]
 resolver = "2"
 
-[patch.crates-io]
-parustiko = { path = "parustiko" }
-crypto = { path = "crypto" }
-

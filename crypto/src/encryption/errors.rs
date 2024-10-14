@@ -7,7 +7,7 @@ pub enum EncryptionError {
 }
 
 #[derive(Debug, Error)]
-pub enum DencryptionError {
+pub enum DecryptionError {
     #[error("block size has incorrect length: ({0})")]
     IncorrectBlockSize(&'static str),
 }
