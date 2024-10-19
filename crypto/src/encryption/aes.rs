@@ -1,6 +1,6 @@
 use super::errors::{DecryptionError, EncryptionError};
 use super::Encryption;
-use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
+pub use aes::cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit};
 use aes::Aes128;
 
 pub struct AES {
@@ -58,12 +58,16 @@ mod tests {
     #[test]
     fn test_correct_encryption_and_decryption() {
         let aes = AES::new();
-
-        let mut block = [42u8; 16];
-        let copy_block = block.clone();
+        let mut block = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+        let mut expected = [
+            101, 159, 42, 191, 197, 188, 7, 8, 251, 150, 231, 164, 74, 249, 213, 149,
+        ];
+        let block_copy = block.clone();
         aes.encrypt(&mut block);
+        assert_eq!(block, expected);
+
         aes.decrypt(&mut block);
-        assert_eq!(copy_block, block);
+        assert_eq!(block, block_copy);
     }
 
     #[test]
