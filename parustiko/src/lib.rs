@@ -1,4 +1,5 @@
 mod errors;
+mod preamble;
 mod protocol;
 
 use crypto::encryption::aes::{GenericArray, AES};
@@ -31,6 +32,7 @@ pub fn runner() -> Result<(), Box<dyn std::error::Error>> {
         String::from("SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.4, OpenSSL 3.0.13 30 Jan 2024\r\n");
 
     stream.write_all(client_version.as_bytes())?;
+    // this message is part of KEX
     let mut output = Vec::new();
     loop {
         let bytes = match stream.read(&mut buffer) {
@@ -43,6 +45,7 @@ pub fn runner() -> Result<(), Box<dyn std::error::Error>> {
 
         output.extend_from_slice(&buffer[..bytes]);
     }
+
     println!("{:?}", String::from_utf8_lossy(&Cow::Borrowed(&output)));
 
     Ok(())
