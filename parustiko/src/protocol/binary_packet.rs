@@ -1,7 +1,7 @@
 use super::BinaryProtocolPacket;
 
-use crate::errors::ProtocolError;
-use crate::protocol::message::SshMessageID;
+use crate::errors::BppError;
+use crate::protocol::message_ids::SshMessageID;
 use crate::protocol::{DecodeRaw, Encode};
 
 use num_traits::FromPrimitive;
@@ -13,26 +13,21 @@ const MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES: usize = 32_768;
 const MIN_PADDING_SIZE_BYTES: u8 = 4;
 
 impl BinaryProtocolPacket {
-    pub fn try_build(
-        padding_length: u8,
-        payload: Vec<u8>,
-        mac: Vec<u8>,
-    ) -> Result<Self, ProtocolError> {
+    pub fn try_build(padding_length: u8, payload: Vec<u8>, mac: Vec<u8>) -> Result<Self, BppError> {
         if payload.len() > MAX_BINARY_PROTOCOL_PAYLOAD_SIZE_BYTES {
-            return Err(ProtocolError::BinaryPacketInvalidEntity(
+            return Err(BppError::InvalidEntity(
                 "payload is too long for SSH message",
             ));
         }
 
         if padding_length < MIN_PADDING_SIZE_BYTES {
-            return Err(ProtocolError::BinaryPacketInvalidEntity(
+            return Err(BppError::InvalidEntity(
                 "padding is too short for SSH message",
             ));
         }
 
-        let message_id = SshMessageID::from_u8(payload[0]).ok_or(
-            ProtocolError::BinaryPacketInvalidEntity("unknown SSH message ID"),
-        )?;
+        let message_id = SshMessageID::from_u8(payload[0])
+            .ok_or(BppError::InvalidEntity("unknown SSH message ID"))?;
         let packet_length = payload.len() as u32 + padding_length as u32 + 1;
         let mac_length = mac.len() as u8;
 
@@ -55,7 +50,7 @@ impl BinaryProtocolPacket {
 impl Encode for BinaryProtocolPacket {
     // SSH protocol utilizes the network endianness, so the packets
     // should be encoded with big endian.
-    fn to_be_bytes(mut self) -> Result<Vec<u8>, ProtocolError> {
+    fn to_be_bytes(mut self) -> Result<Vec<u8>, BppError> {
         let expected_buff_size = self.size();
         let mut buff = Vec::with_capacity(expected_buff_size);
 
@@ -73,7 +68,7 @@ impl Encode for BinaryProtocolPacket {
         buff.append(&mut self.mac);
 
         if buff.len() != expected_buff_size {
-            return Err(ProtocolError::BinaryPacketEncodingFailed(
+            return Err(BppError::EncodingFailed(
                 "final buffer has incorrect length",
             ));
         }
@@ -94,7 +89,7 @@ impl Encode for BinaryProtocolPacket {
 impl DecodeRaw for BinaryProtocolPacket {
     type Entity = Self;
 
-    fn from_be_bytes<R: Read>(mut buffer: R, mac_size: u8) -> Result<Self::Entity, ProtocolError> {
+    fn from_be_bytes<R: Read>(mut buffer: R, mac_size: u8) -> Result<Self::Entity, BppError> {
         let mut packet_length = [0_u8; 4];
         buffer.read_exact(&mut packet_length)?;
 
