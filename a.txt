@@ -1,0 +1,159 @@
+debug1: Reading configuration data /etc/ssh/ssh_config
+debug1: /etc/ssh/ssh_config line 19: include /etc/ssh/ssh_config.d/*.conf matched no files
+debug1: /etc/ssh/ssh_config line 21: Applying options for *
+debug2: resolve_canonicalize: hostname 10.10.10.10 is address
+debug3: expanded UserKnownHostsFile '~/.ssh/known_hosts' -> '/home/leghart/.ssh/known_hosts'
+debug3: expanded UserKnownHostsFile '~/.ssh/known_hosts2' -> '/home/leghart/.ssh/known_hosts2'
+debug3: channel_clear_timeouts: clearing
+debug3: ssh_connect_direct: entering
+debug1: Connecting to 10.10.10.10 [10.10.10.10] port 22.
+debug3: set_sock_tos: set socket 3 IP_TOS 0x10
+debug1: Connection established.
+debug1: identity file /home/leghart/.ssh/id_rsa type -1
+debug1: identity file /home/leghart/.ssh/id_rsa-cert type -1
+debug1: identity file /home/leghart/.ssh/id_ecdsa type -1
+debug1: identity file /home/leghart/.ssh/id_ecdsa-cert type -1
+debug1: identity file /home/leghart/.ssh/id_ecdsa_sk type -1
+debug1: identity file /home/leghart/.ssh/id_ecdsa_sk-cert type -1
+debug1: identity file /home/leghart/.ssh/id_ed25519 type -1
+debug1: identity file /home/leghart/.ssh/id_ed25519-cert type -1
+debug1: identity file /home/leghart/.ssh/id_ed25519_sk type -1
+debug1: identity file /home/leghart/.ssh/id_ed25519_sk-cert type -1
+debug1: identity file /home/leghart/.ssh/id_xmss type -1
+debug1: identity file /home/leghart/.ssh/id_xmss-cert type -1
+debug1: identity file /home/leghart/.ssh/id_dsa type -1
+debug1: identity file /home/leghart/.ssh/id_dsa-cert type -1
+debug1: Local version string SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.4
+debug1: Remote protocol version 2.0, remote software version OpenSSH_7.6p1 Ubuntu-4ubuntu0.7
+debug1: compat_banner: match: OpenSSH_7.6p1 Ubuntu-4ubuntu0.7 pat OpenSSH_7.0*,OpenSSH_7.1*,OpenSSH_7.2*,OpenSSH_7.3*,OpenSSH_7.5*,OpenSSH_7.6*,OpenSSH_7.7* compat 0x04000002
+debug2: fd 3 setting O_NONBLOCK
+debug1: Authenticating to 10.10.10.10:22 as 'user'
+debug3: record_hostkey: found key type ED25519 in file /home/leghart/.ssh/known_hosts:14
+debug3: record_hostkey: found key type ECDSA in file /home/leghart/.ssh/known_hosts:15
+debug3: load_hostkeys_file: loaded 2 keys from 10.10.10.10
+debug1: load_hostkeys: fopen /home/leghart/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug3: order_hostkeyalgs: have matching best-preference key type ssh-ed25519-cert-v01@openssh.com, using HostkeyAlgorithms verbatim
+debug3: send packet: type 20
+debug1: SSH2_MSG_KEXINIT sent
+debug3: receive packet: type 20
+debug1: SSH2_MSG_KEXINIT received
+debug2: local client KEXINIT proposal
+debug2: KEX algorithms: sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256,ext-info-c,kex-strict-c-v00@openssh.com
+debug2: host key algorithms: ssh-ed25519-cert-v01@openssh.com,ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,ecdsa-sha2-nistp521-cert-v01@openssh.com,sk-ssh-ed25519-cert-v01@openssh.com,sk-ecdsa-sha2-nistp256-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com,sk-ecdsa-sha2-nistp256@openssh.com,rsa-sha2-512,rsa-sha2-256
+debug2: ciphers ctos: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: ciphers stoc: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: MACs ctos: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: MACs stoc: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: compression ctos: none,zlib@openssh.com,zlib
+debug2: compression stoc: none,zlib@openssh.com,zlib
+debug2: languages ctos: 
+debug2: languages stoc: 
+debug2: first_kex_follows 0 
+debug2: reserved 0 
+debug2: peer server KEXINIT proposal
+debug2: KEX algorithms: curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256,diffie-hellman-group14-sha1
+debug2: host key algorithms: ssh-rsa,rsa-sha2-512,rsa-sha2-256,ecdsa-sha2-nistp256,ssh-ed25519
+debug2: ciphers ctos: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: ciphers stoc: chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com
+debug2: MACs ctos: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: MACs stoc: umac-64-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,umac-64@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1
+debug2: compression ctos: none,zlib@openssh.com
+debug2: compression stoc: none,zlib@openssh.com
+debug2: languages ctos: 
+debug2: languages stoc: 
+debug2: first_kex_follows 0 
+debug2: reserved 0 
+debug1: kex: algorithm: curve25519-sha256
+debug1: kex: host key algorithm: ssh-ed25519
+debug1: kex: server->client cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug1: kex: client->server cipher: chacha20-poly1305@openssh.com MAC: <implicit> compression: none
+debug3: send packet: type 30
+debug1: expecting SSH2_MSG_KEX_ECDH_REPLY
+debug3: receive packet: type 31
+debug1: SSH2_MSG_KEX_ECDH_REPLY received
+debug1: Server host key: ssh-ed25519 SHA256:szHRqI7n9DETKpZly1/WHDI49Kt9MwfDODh494s073w
+debug3: record_hostkey: found key type ED25519 in file /home/leghart/.ssh/known_hosts:14
+debug3: record_hostkey: found key type ECDSA in file /home/leghart/.ssh/known_hosts:15
+debug3: load_hostkeys_file: loaded 2 keys from 10.10.10.10
+debug1: load_hostkeys: fopen /home/leghart/.ssh/known_hosts2: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts: No such file or directory
+debug1: load_hostkeys: fopen /etc/ssh/ssh_known_hosts2: No such file or directory
+debug1: Host '10.10.10.10' is known and matches the ED25519 host key.
+debug1: Found key in /home/leghart/.ssh/known_hosts:14
+debug3: send packet: type 21
+debug2: ssh_set_newkeys: mode 1
+debug1: rekey out after 134217728 blocks
+debug1: SSH2_MSG_NEWKEYS sent
+debug1: expecting SSH2_MSG_NEWKEYS
+debug3: receive packet: type 21
+debug1: SSH2_MSG_NEWKEYS received
+debug2: ssh_set_newkeys: mode 0
+debug1: rekey in after 134217728 blocks
+debug3: send packet: type 5
+debug3: receive packet: type 7
+debug1: SSH2_MSG_EXT_INFO received
+debug3: kex_input_ext_info: extension server-sig-algs
+debug1: kex_ext_info_client_parse: server-sig-algs=<ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ssh-dss,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521>
+debug3: receive packet: type 6
+debug2: service_accept: ssh-userauth
+debug1: SSH2_MSG_SERVICE_ACCEPT received
+debug3: send packet: type 50
+debug3: receive packet: type 51
+debug1: Authentications that can continue: publickey,password
+debug3: start over, passed a different list publickey,password
+debug3: preferred gssapi-with-mic,publickey,keyboard-interactive,password
+debug3: authmethod_lookup publickey
+debug3: remaining preferred: keyboard-interactive,password
+debug3: authmethod_is_enabled publickey
+debug1: Next authentication method: publickey
+debug3: ssh_get_authentication_socket_path: path '/run/user/1000/keyring/ssh'
+debug1: get_agent_identities: bound agent to hostkey
+debug1: get_agent_identities: agent returned 2 keys
+debug1: Will attempt key: leghart@leghart-GL65-9SC RSA SHA256:XeKbeecCDr/yjyrN/nkxWTn+BOx6gOUqs+0vfPLqPtc agent
+debug1: Will attempt key: leghart@leghart-GL65-9SC RSA SHA256:qFU48Z/NJc3tJPPzT7xYlewTorYQt8YfQII+wxgoh5Y agent
+debug1: Will attempt key: /home/leghart/.ssh/id_rsa 
+debug1: Will attempt key: /home/leghart/.ssh/id_ecdsa 
+debug1: Will attempt key: /home/leghart/.ssh/id_ecdsa_sk 
+debug1: Will attempt key: /home/leghart/.ssh/id_ed25519 
+debug1: Will attempt key: /home/leghart/.ssh/id_ed25519_sk 
+debug1: Will attempt key: /home/leghart/.ssh/id_xmss 
+debug1: Will attempt key: /home/leghart/.ssh/id_dsa 
+debug2: pubkey_prepare: done
+debug1: Offering public key: leghart@leghart-GL65-9SC RSA SHA256:XeKbeecCDr/yjyrN/nkxWTn+BOx6gOUqs+0vfPLqPtc agent
+debug3: send packet: type 50
+debug2: we sent a publickey packet, wait for reply
+debug3: receive packet: type 51
+debug1: Authentications that can continue: publickey,password
+debug1: Offering public key: leghart@leghart-GL65-9SC RSA SHA256:qFU48Z/NJc3tJPPzT7xYlewTorYQt8YfQII+wxgoh5Y agent
+debug3: send packet: type 50
+debug2: we sent a publickey packet, wait for reply
+debug3: receive packet: type 51
+debug1: Authentications that can continue: publickey,password
+debug1: Trying private key: /home/leghart/.ssh/id_rsa
+debug3: no such identity: /home/leghart/.ssh/id_rsa: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_ecdsa
+debug3: no such identity: /home/leghart/.ssh/id_ecdsa: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_ecdsa_sk
+debug3: no such identity: /home/leghart/.ssh/id_ecdsa_sk: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_ed25519
+debug3: no such identity: /home/leghart/.ssh/id_ed25519: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_ed25519_sk
+debug3: no such identity: /home/leghart/.ssh/id_ed25519_sk: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_xmss
+debug3: no such identity: /home/leghart/.ssh/id_xmss: No such file or directory
+debug1: Trying private key: /home/leghart/.ssh/id_dsa
+debug3: no such identity: /home/leghart/.ssh/id_dsa: No such file or directory
+debug2: we did not send a packet, disable method
+debug3: authmethod_lookup password
+debug3: remaining preferred: ,password
+debug3: authmethod_is_enabled password
+debug1: Next authentication method: password
+user@10.10.10.10's password: 
+
+
+\0\0\u{4}4\u{6}\u{14}\u{1d}�?�\u{2}K�\u{13}g\u{1f}e4$��H\0\0\u{1}\u{2}
+\0\0\u{4}4\u{6}\u{14}s�E!\n�b�C\u{3}\u{1a}�Ņ/g\0\0\u{1}\u{2}
+\0\0\u{4}4\u{6}\u{14}M�Rz\u{3}�\r������KtX\0\0\u{1}\u{2}
+\0\0\u{4}4\u{6}\u{14}��>��u�ׯ�j��\u{1f}�E\0\0\u{1}\u{2}

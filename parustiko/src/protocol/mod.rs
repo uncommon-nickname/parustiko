@@ -1,4 +1,4 @@
-mod bpp;
+pub mod bpp;
 mod message;
 
 use crate::errors::ProtocolError;
@@ -24,5 +24,5 @@ pub trait DecodeRaw {
     type Entity;
 
     // Construct the entity from readable buffer.
-    fn from_be_bytes<R: Read>(buffer: R, mac_size: u8) -> Result<Self::Entity, ProtocolError>;
+    fn from_be_bytes<R: Read>(buffer: &mut R, mac_size: u8) -> Result<Self::Entity, ProtocolError>;
 }

@@ -94,7 +94,7 @@ impl Encode for BinaryProtocolPacket {
 impl DecodeRaw for BinaryProtocolPacket {
     type Entity = Self;
 
-    fn from_be_bytes<R: Read>(mut buffer: R, mac_size: u8) -> Result<Self::Entity, ProtocolError> {
+    fn from_be_bytes<R: Read>(buffer: &mut R, mac_size: u8) -> Result<Self::Entity, ProtocolError> {
         let mut packet_length = [0_u8; 4];
         buffer.read_exact(&mut packet_length)?;
 
