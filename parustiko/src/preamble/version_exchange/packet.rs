@@ -3,7 +3,7 @@ use super::SshVersionExchange;
 use std::fmt;
 
 impl SshVersionExchange {
-    fn try_build(
+    pub fn try_build(
         proto_version: &str,
         software_version: &str,
         comments: Option<&str>,
@@ -32,7 +32,7 @@ impl SshVersionExchange {
         })
     }
 
-    fn from_string(version_string: &str) -> Result<Self, VersionExchangeError> {
+    pub fn from_string(version_string: &str) -> Result<Self, VersionExchangeError> {
         if !version_string.starts_with("SSH-") {
             return Err(VersionExchangeError::InvalidSshMsgFormat(
                 "Missing 'SSH-' part",
@@ -66,7 +66,9 @@ impl SshVersionExchange {
         })
     }
 
-    fn to_string(&self) -> String {
+    // pub fn from_bytes(arr: &mut [u8; 51]) -> Result<Self, VersionExchangeError> {}
+
+    pub fn to_string(&self) -> String {
         let mut result = format!("SSH-{}-{}", self.proto_version, self.software_version);
         if let Some(ref comments) = self.comments {
             result.push(' ');

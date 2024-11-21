@@ -1,5 +1,5 @@
 mod errors;
-mod packet;
+pub mod packet;
 
 #[derive(Debug)]
 pub struct SshVersionExchange {
