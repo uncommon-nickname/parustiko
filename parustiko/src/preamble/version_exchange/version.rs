@@ -1,8 +1,8 @@
 use super::errors::VersionExchangeError;
-use super::SshVersionExchange;
+use super::SshVersion;
 use std::fmt;
 
-impl SshVersionExchange {
+impl SshVersion {
     pub fn try_build(
         proto_version: &str,
         software_version: &str,
@@ -66,8 +66,6 @@ impl SshVersionExchange {
         })
     }
 
-    // pub fn from_bytes(arr: &mut [u8; 51]) -> Result<Self, VersionExchangeError> {}
-
     pub fn to_string(&self) -> String {
         let mut result = format!("SSH-{}-{}", self.proto_version, self.software_version);
         if let Some(ref comments) = self.comments {
@@ -79,7 +77,7 @@ impl SshVersionExchange {
     }
 }
 
-impl fmt::Display for SshVersionExchange {
+impl fmt::Display for SshVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.to_string())
     }
@@ -92,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_correct_create_verion_exchange_structure() {
-        let msg = SshVersionExchange::try_build("2.0", "OpenSSH-XXX", None);
+        let msg = SshVersion::try_build("2.0", "OpenSSH-XXX", None);
         assert!(msg.is_ok());
     }
 
@@ -110,7 +108,7 @@ mod tests {
     //     #[case] comment: Option<&str>,
     //     #[case] err_str: &str,
     // ) {
-    //     let err = SshVersionExchange::try_build(proto_version, software_version, comment)
+    //     let err = SshVersion::try_build(proto_version, software_version, comment)
     //         .unwrap_err()
     //         .to_string();
 
@@ -118,7 +116,7 @@ mod tests {
     // }
     #[test]
     fn test_incorrect_proto_version() {
-        let err = SshVersionExchange::try_build("3.0", "", None)
+        let err = SshVersion::try_build("3.0", "", None)
             .unwrap_err()
             .to_string();
 
@@ -131,7 +129,7 @@ mod tests {
     #[test]
     fn test_too_long_software_version() {
         let sw = "a".repeat(256);
-        let err = SshVersionExchange::try_build("2.0", sw.as_str(), None)
+        let err = SshVersion::try_build("2.0", sw.as_str(), None)
             .unwrap_err()
             .to_string();
 
@@ -141,7 +139,7 @@ mod tests {
     #[test]
     fn test_too_long_comment() {
         let c = "a".repeat(256);
-        let err = SshVersionExchange::try_build("2.0", "abc", Some(c.as_str()))
+        let err = SshVersion::try_build("2.0", "abc", Some(c.as_str()))
             .unwrap_err()
             .to_string();
 
