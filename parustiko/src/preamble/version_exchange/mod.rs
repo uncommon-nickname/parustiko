@@ -1,4 +1,4 @@
-mod errors;
+pub mod errors;
 pub mod exchange;
 pub mod version;
 // use crate::protocol::message::SshMessageID; //TODO?

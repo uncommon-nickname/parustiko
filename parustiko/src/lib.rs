@@ -4,49 +4,38 @@ mod protocol;
 
 use crypto::encryption::aes::{GenericArray, AES};
 use crypto::encryption::Encryption;
+use preamble::version_exchange::errors::VersionExchangeError;
 use preamble::version_exchange::{KeyExchange, SshVersion};
 use protocol::bpp::BinaryProtocolPacket;
 use protocol::DecodeRaw;
 use std::borrow::Cow;
 use std::fs::read;
+use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::time::Duration;
 
 // Read bytes from stream until CR and LF ('\r\n') occur
-fn read_header<T: Read>(arr: &mut T) -> [u8; 51] {
-    let mut x = [0; 51];
+fn read_header<T: Read>(arr: &mut T) -> Result<Vec<u8>, VersionExchangeError> {
+    let mut header = Vec::with_capacity(51);
     let mut prev_byte = None;
 
-    for idx in 0..x.len() {
-        let mut read_byte = &mut x[idx..=idx];
-        arr.read_exact(&mut read_byte).unwrap();
+    loop {
+        let mut byte = [0u8; 1];
+
+        arr.read_exact(&mut byte)
+            .map_err(|e| VersionExchangeError::EmptyStream("Unexpected end of stream"))?;
+
+        header.push(byte[0]);
 
         if let Some(13) = prev_byte {
-            if x[idx] == 10 {
+            if byte[0] == 10 {
                 break;
             }
         }
-        prev_byte = Some(x[idx]);
+        prev_byte = Some(byte[0]);
     }
-
-    x
-}
-
-fn test_read_from_stream<T: Read>(stream: &mut T) {
-    let mut buf = [0; 256];
-    loop {
-        let bytes = match stream.read(&mut buf) {
-            Ok(n) => n,
-            Err(_) => 0,
-        };
-        if bytes == 0 {
-            println!("Empty stream");
-            break;
-        }
-
-        println!("{:?}", String::from_utf8_lossy(&buf));
-    }
+    Ok(header)
 }
 
 pub fn runner() -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +50,7 @@ pub fn runner() -> Result<(), Box<dyn std::error::Error>> {
     stream.write_all(client_version.to_string().as_bytes())?;
     std::thread::sleep(Duration::from_millis(10));
 
-    let header = read_header(&mut stream);
+    let header = read_header(&mut stream)?;
     let server_version =
         SshVersion::from_string(String::from_utf8_lossy(&header).trim_matches(char::from(0)))?;
 

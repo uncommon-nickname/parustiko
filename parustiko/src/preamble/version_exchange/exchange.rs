@@ -4,23 +4,6 @@ use std::io::Read;
 use std::mem::size_of;
 
 impl KeyExchange {
-    // pub fn from_bytes<R: Read>(buffer: &mut R) -> Result<Self, VersionExchangeError> {
-    // pub fn from_bytes(bytes: &mut Vec<u8>) {
-    //     let mut offset = 1 + 16;
-
-    //     while offset + 4 <= bytes.len() {
-    //         let section_len = u32::from_be_bytes(bytes[offset..offset + 4].try_into().unwrap());
-    //         offset += 4;
-
-    //         let section_end = offset + section_len as usize;
-    //         let result = KeyExchange::parse_section(&bytes[offset..section_end]);
-
-    //         println!("{:?}", result);
-
-    //         offset = section_end;
-    //     }
-    // }
-
     pub fn from_bytes(bytes: &[u8]) -> Result<KeyExchange, VersionExchangeError> {
         let mut offset = 17; //skip SSH_MSG byte and cookies
 

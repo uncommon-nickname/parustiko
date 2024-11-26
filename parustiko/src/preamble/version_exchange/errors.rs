@@ -9,8 +9,8 @@ pub enum VersionExchangeError {
     TooLongString(&'static str),
 
     #[error("{0}")]
-    DeserializeError(&'static str),
+    InvalidSshMsgFormat(&'static str),
 
     #[error("{0}")]
-    InvalidSshMsgFormat(&'static str),
+    EmptyStream(&'static str),
 }
