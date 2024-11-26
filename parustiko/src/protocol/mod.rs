@@ -1,5 +1,5 @@
 mod binary_packet;
-mod message_ids;
+pub mod message_ids;
 
 use crate::errors::BppError;
 use message_ids::SshMessageID;

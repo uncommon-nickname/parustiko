@@ -45,6 +45,10 @@ impl BinaryProtocolPacket {
         let mut rng = rand::thread_rng();
         (0..self.padding_length).map(|_| rng.gen()).collect()
     }
+
+    pub fn get_payload(&self) -> &Vec<u8> {
+        &self.payload
+    }
 }
 
 impl Encode for BinaryProtocolPacket {

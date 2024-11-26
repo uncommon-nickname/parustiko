@@ -1,5 +1,5 @@
-use super::errors::VersionExchangeError;
 use super::SshVersion;
+use crate::errors::VersionExchangeError;
 use std::fmt;
 
 impl SshVersion {
@@ -16,12 +16,16 @@ impl SshVersion {
         }
 
         if software_version.len() > 255 {
-            return Err(VersionExchangeError::TooLongString("Software version"));
+            return Err(VersionExchangeError::InvalidString(
+                "Software version string is too long",
+            ));
         }
 
         if let Some(c) = comments {
             if c.len() > 255 {
-                return Err(VersionExchangeError::TooLongString("Comment"));
+                return Err(VersionExchangeError::InvalidString(
+                    "Comment string is too long",
+                ));
             }
         }
 

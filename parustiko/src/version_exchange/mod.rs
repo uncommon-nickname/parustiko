@@ -1,7 +1,6 @@
-pub mod errors;
 pub mod exchange;
 pub mod version;
-// use crate::protocol::message::SshMessageID; //TODO?
+use crate::protocol::message_ids::SshMessageID;
 
 #[derive(Debug)]
 pub struct SshVersion {
@@ -10,10 +9,9 @@ pub struct SshVersion {
     comments: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct KeyExchange {
-    // message_id: SshMessageID,
-    message_id: u32,
+    message_id: SshMessageID,
     cookie: [u8; 16],
     kex_algorithms: Vec<String>,
     host_key_algorithms: Vec<String>,
