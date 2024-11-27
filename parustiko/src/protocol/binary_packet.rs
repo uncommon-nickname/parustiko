@@ -2,7 +2,7 @@ use super::BinaryProtocolPacket;
 
 use crate::errors::BppError;
 use crate::protocol::message_ids::SshMessageID;
-use crate::protocol::{DecodeRaw, Encode};
+use crate::protocol::{Decode, DecodeRaw, Encode};
 
 use num_traits::FromPrimitive;
 use rand::Rng;
@@ -120,6 +120,18 @@ impl DecodeRaw for BinaryProtocolPacket {
         };
 
         Self::Entity::try_build(padding_length, payload, mac)
+    }
+}
+
+impl Decode for BinaryProtocolPacket {
+    type Entity = Self;
+
+    fn from_be_bytes(buffer: Vec<u8>) -> Result<Self::Entity, BppError> {
+        let mut cursor = std::io::Cursor::new(buffer);
+        println!("{:?}", cursor);
+
+        let mac_size = 0;
+        <Self as DecodeRaw>::from_be_bytes(&mut cursor, mac_size)
     }
 }
 

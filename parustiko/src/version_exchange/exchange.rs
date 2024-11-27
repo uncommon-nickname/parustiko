@@ -40,9 +40,8 @@ impl KeyExchange {
     pub fn to_be_bytes(&self) -> Vec<u8> {
         let mut output: Vec<u8> = Vec::new();
 
-        output.push(SshMessageID::KexInit as u8);
+        output.push(SshMessageID::KexInit);
         output.extend_from_slice(&self.cookie);
-
         output.extend(KeyExchange::vec_string_to_bytes(&self.kex_algorithms));
         output.extend(KeyExchange::vec_string_to_bytes(&self.host_key_algorithms));
         output.extend(KeyExchange::vec_string_to_bytes(&self.ciphers_ctos));
@@ -56,6 +55,8 @@ impl KeyExchange {
         output.push(self.first_kex_follows as u8);
         output.push(self.reserved as u8); //TODO! endianness
 
+        output.extend([0, 0, 0]); // end message
+
         output
     }
 
@@ -65,7 +66,7 @@ impl KeyExchange {
         }
         let data_length: usize =
             strings.iter().map(|s| s.len()).sum::<usize>() + (strings.len() - 1);
-        let total_length = data_length + 4 + 3;
+        let total_length = data_length;
 
         let mut result = Vec::with_capacity(total_length);
 
@@ -77,8 +78,6 @@ impl KeyExchange {
                 result.push(44);
             }
         }
-
-        result.extend([0, 0, 0]);
 
         result
     }

@@ -5,8 +5,8 @@ mod version_exchange;
 use crypto::encryption::aes::{GenericArray, AES};
 use crypto::encryption::Encryption;
 use errors::VersionExchangeError;
-use protocol::BinaryProtocolPacket;
 use protocol::DecodeRaw;
+use protocol::{BinaryProtocolPacket, Decode};
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::time::Duration;
@@ -51,16 +51,15 @@ pub fn runner() -> Result<(), Box<dyn std::error::Error>> {
     let server_version =
         SshVersion::from_string(String::from_utf8_lossy(&header).trim_matches(char::from(0)))?;
 
-    let mut bpp = BinaryProtocolPacket::from_be_bytes(&mut stream, 0)?;
-    println!("{:?}", bpp.get_payload().len());
+    let mut bpp = <BinaryProtocolPacket as DecodeRaw>::from_be_bytes(&mut stream, 0)?;
     let key_exchange = KeyExchange::from_bytes(&mut bpp.get_payload())?;
-    // println!(">>>> {:#?}", key_exchange);
 
     // TODO! create client KeyExchange -> to_bytes (as vec) -> BPP -> to_be_bytes -> stream.send()
     let client_kex = key_exchange.clone(); // for tests
 
     let a = client_kex.to_be_bytes();
-    println!("{:?}", a.len()); //TODO!: len is incorrect
+    let encoded_client = <BinaryProtocolPacket as Decode>::from_be_bytes(a)?; //TODO! decoding error
+    println!("{:?}", encoded_client);
 
     Ok(())
 }
