@@ -127,11 +127,8 @@ impl Decode for BinaryProtocolPacket {
     type Entity = Self;
 
     fn from_be_bytes(buffer: Vec<u8>) -> Result<Self::Entity, BppError> {
-        let mut cursor = std::io::Cursor::new(buffer);
-        println!("{:?}", cursor);
-
         let mac_size = 0;
-        <Self as DecodeRaw>::from_be_bytes(&mut cursor, mac_size)
+        <Self as DecodeRaw>::from_be_bytes(&mut &buffer[..], mac_size)
     }
 }
 
@@ -242,7 +239,7 @@ mod tests {
     #[case(9)] // One byte short to read padding.
     #[case(11)] // One byte short to read mac.
     fn decode_not_enough_data_in_buffer(raw_buffer: Vec<u8>, #[case] stop: usize) {
-        let err = BinaryProtocolPacket::from_be_bytes(&raw_buffer[..stop], 2)
+        let err = <BinaryProtocolPacket as DecodeRaw>::from_be_bytes(&mut &raw_buffer[..stop], 2)
             .unwrap_err()
             .to_string();
 
@@ -251,7 +248,8 @@ mod tests {
 
     #[rstest]
     fn decode_buffer_into_packet_object(raw_buffer: Vec<u8>) {
-        let message = BinaryProtocolPacket::from_be_bytes(&raw_buffer[..], 2).unwrap();
+        let message =
+            <BinaryProtocolPacket as DecodeRaw>::from_be_bytes(&mut &raw_buffer[..], 2).unwrap();
 
         assert_eq!(message.message_id, SshMessageID::KexInit);
         assert_eq!(message.packet_length, 6);

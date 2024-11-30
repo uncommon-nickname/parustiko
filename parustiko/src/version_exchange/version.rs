@@ -1,6 +1,7 @@
 use super::SshVersion;
 use crate::errors::VersionExchangeError;
 use std::fmt;
+use std::io::Read;
 
 impl SshVersion {
     pub fn try_build(
@@ -8,7 +9,6 @@ impl SshVersion {
         software_version: &str,
         comments: Option<&str>,
     ) -> Result<Self, VersionExchangeError> {
-        // TODO? maybe forbidden list?
         if proto_version != "1.0" && proto_version != "2.0" {
             return Err(VersionExchangeError::InvalidProtoVersion(
                 "correct versions: '1.0' or '2.0'",
@@ -47,18 +47,21 @@ impl SshVersion {
             .trim_end_matches("\r\n")
             .trim_start_matches("SSH-");
 
-        let parts: Vec<&str> = clean_str.splitn(3, ' ').collect();
+        let parts: Vec<&str> = clean_str.split(' ').collect();
 
-        if parts.len() < 2 {
+        let proto_version: String;
+        let software_version: String;
+        if let Some((proto, software)) = parts[0].split_once('-') {
+            proto_version = proto.to_string();
+            software_version = software.to_string();
+        } else {
             return Err(VersionExchangeError::InvalidSshMsgFormat(
                 "Malformed SSH version exchange string",
             ));
         }
 
-        let proto_version = parts[0].to_string();
-        let software_version = parts[1].to_string();
-        let comments = if parts.len() == 3 {
-            Some(parts[2].to_string())
+        let comments = if parts.len() == 2 {
+            Some(parts[1].to_string())
         } else {
             None
         };
@@ -79,6 +82,24 @@ impl SshVersion {
         result.push_str("\r\n");
         result
     }
+
+    // Read bytes from stream until CR and LF ('\r\n') occur
+    pub fn read_header<R: Read>(arr: &mut R) -> Result<Vec<u8>, VersionExchangeError> {
+        const MAX_SIZE: usize = 51; // max size defined by RFC4253
+        let mut header = vec![0; MAX_SIZE];
+
+        _ = arr.read_exact(&mut header[..1]);
+        for i in 1..MAX_SIZE {
+            _ = arr.read_exact(&mut header[i..(i + 1)]);
+            if header[i - 1] == 13 && header[i] == 10 {
+                return Ok(header[..(i + 1)].to_vec());
+            }
+        }
+
+        Err(VersionExchangeError::EmptyStream(format!(
+            "Not found '\r\n in the first {MAX_SIZE} bytes"
+        )))
+    }
 }
 
 impl fmt::Display for SshVersion {
@@ -90,34 +111,19 @@ impl fmt::Display for SshVersion {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::{fixture, rstest};
+    use rstest::rstest;
 
     #[test]
     fn test_correct_create_verion_exchange_structure() {
-        let msg = SshVersion::try_build("2.0", "OpenSSH-XXX", None);
+        let msg = SshVersion::try_build("2.0", "parustiko-XXX", None);
         assert!(msg.is_ok());
+
+        let version = msg.unwrap();
+        assert_eq!(version.proto_version, "2.0");
+        assert_eq!(version.software_version, "parustiko-XXX");
+        assert_eq!(version.comments, None);
     }
 
-    // #[rstest]
-    // #[case(
-    //     "3.0",
-    //     "",
-    //     "Proto version incorrect - correct versions: '1.0' or '2.0'"
-    // )]
-    // #[case("2.0", "A".repeat(256), "padding is too short for SSH message")]
-    // #[case(vec![0_u8; 5], 25, "unknown SSH message ID")]
-    // fn test_create_message_errors(
-    //     #[case] proto_version: &str,
-    //     #[case] software_version: &str,
-    //     #[case] comment: Option<&str>,
-    //     #[case] err_str: &str,
-    // ) {
-    //     let err = SshVersion::try_build(proto_version, software_version, comment)
-    //         .unwrap_err()
-    //         .to_string();
-
-    //     assert_eq!(err, err_str);
-    // }
     #[test]
     fn test_incorrect_proto_version() {
         let err = SshVersion::try_build("3.0", "", None)
@@ -137,7 +143,7 @@ mod tests {
             .unwrap_err()
             .to_string();
 
-        assert_eq!(err, "Software version too long");
+        assert_eq!(err, "Software version string is too long");
     }
 
     #[test]
@@ -147,6 +153,73 @@ mod tests {
             .unwrap_err()
             .to_string();
 
-        assert_eq!(err, "Comment too long");
+        assert_eq!(err, "Comment string is too long");
+    }
+
+    #[test]
+    fn test_build_from_string_with_comments() {
+        let result = SshVersion::from_string("SSH-2.0-parustiko-XXX comments\r\n");
+        assert!(result.is_ok());
+
+        let version = result.unwrap();
+        assert_eq!(version.proto_version, "2.0");
+        assert_eq!(version.software_version, "parustiko-XXX");
+        assert_eq!(version.comments, Some("comments".to_string()));
+    }
+
+    #[test]
+    fn test_build_from_string_without_comments() {
+        let result = SshVersion::from_string("SSH-2.0-parustiko-XXX");
+        assert!(result.is_ok());
+
+        let version = result.unwrap();
+        assert_eq!(version.proto_version, "2.0");
+        assert_eq!(version.software_version, "parustiko-XXX");
+        assert_eq!(version.comments, None);
+    }
+
+    #[rstest]
+    #[case("SSH-2.0parustikoXXX\r\n", "Malformed SSH version exchange string")]
+    #[case("2.0-parustiko-XXX\r\n", "Missing 'SSH-' part")]
+    fn test_invalid_string_message(#[case] msg: &str, #[case] err_str: &str) {
+        let result = SshVersion::from_string(msg);
+        assert!(result.is_err());
+
+        let err = result.unwrap_err().to_string();
+        assert_eq!(err, err_str);
+    }
+
+    #[test]
+    fn test_version_to_string() {
+        let version = SshVersion {
+            proto_version: "2.0".to_string(),
+            software_version: "parustiko".to_string(),
+            comments: None,
+        };
+
+        assert_eq!(version.to_string(), "SSH-2.0-parustiko\r\n");
+    }
+
+    #[test]
+    fn test_read_header_invalid_stream_bytes() {
+        let mut stream = std::io::Cursor::new(b"SSH".to_vec());
+
+        let result = SshVersion::read_header(&mut stream);
+        assert!(result.is_err());
+
+        let msg = result.unwrap_err().to_string();
+        assert_eq!(msg, "Not found '\r\n in the first 51 bytes");
+    }
+
+    #[test]
+    fn test_read_header_success() {
+        let server_response = b"SSH\r\n";
+        let mut stream = std::io::Cursor::new(server_response.to_vec());
+
+        let result = SshVersion::read_header(&mut stream);
+        assert!(result.is_ok());
+
+        let data = result.unwrap();
+        assert_eq!(data, [83, 83, 72, 13, 10]);
     }
 }

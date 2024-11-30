@@ -25,7 +25,7 @@ pub enum VersionExchangeError {
     InvalidSshMsgFormat(&'static str),
 
     #[error("{0}")]
-    EmptyStream(&'static str),
+    EmptyStream(String),
 
     #[error("{0}")]
     OffsetOutOfRange(&'static str),
