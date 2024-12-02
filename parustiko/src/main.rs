@@ -1,3 +1,8 @@
 fn main() {
-    parustiko::runner();
+    match parustiko::runner() {
+        Err(e) => {
+            println!("{:?}", e);
+        }
+        _ => {}
+    }
 }

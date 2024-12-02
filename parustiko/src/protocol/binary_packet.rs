@@ -2,7 +2,7 @@ use super::BinaryProtocolPacket;
 
 use crate::errors::BppError;
 use crate::protocol::message_ids::SshMessageID;
-use crate::protocol::{DecodeRaw, Encode};
+use crate::protocol::{Decode, DecodeRaw, Encode};
 
 use num_traits::FromPrimitive;
 use rand::Rng;
@@ -44,6 +44,10 @@ impl BinaryProtocolPacket {
     fn build_random_padding(&self) -> Vec<u8> {
         let mut rng = rand::thread_rng();
         (0..self.padding_length).map(|_| rng.gen()).collect()
+    }
+
+    pub fn get_payload(&self) -> &Vec<u8> {
+        &self.payload
     }
 }
 
@@ -89,7 +93,7 @@ impl Encode for BinaryProtocolPacket {
 impl DecodeRaw for BinaryProtocolPacket {
     type Entity = Self;
 
-    fn from_be_bytes<R: Read>(mut buffer: R, mac_size: u8) -> Result<Self::Entity, BppError> {
+    fn from_be_bytes<R: Read>(buffer: &mut R, mac_size: u8) -> Result<Self::Entity, BppError> {
         let mut packet_length = [0_u8; 4];
         buffer.read_exact(&mut packet_length)?;
 
@@ -116,6 +120,15 @@ impl DecodeRaw for BinaryProtocolPacket {
         };
 
         Self::Entity::try_build(padding_length, payload, mac)
+    }
+}
+
+impl Decode for BinaryProtocolPacket {
+    type Entity = Self;
+
+    fn from_be_bytes(buffer: Vec<u8>) -> Result<Self::Entity, BppError> {
+        let mac_size = 0;
+        <Self as DecodeRaw>::from_be_bytes(&mut &buffer[..], mac_size)
     }
 }
 
@@ -226,7 +239,7 @@ mod tests {
     #[case(9)] // One byte short to read padding.
     #[case(11)] // One byte short to read mac.
     fn decode_not_enough_data_in_buffer(raw_buffer: Vec<u8>, #[case] stop: usize) {
-        let err = BinaryProtocolPacket::from_be_bytes(&raw_buffer[..stop], 2)
+        let err = <BinaryProtocolPacket as DecodeRaw>::from_be_bytes(&mut &raw_buffer[..stop], 2)
             .unwrap_err()
             .to_string();
 
@@ -235,7 +248,8 @@ mod tests {
 
     #[rstest]
     fn decode_buffer_into_packet_object(raw_buffer: Vec<u8>) {
-        let message = BinaryProtocolPacket::from_be_bytes(&raw_buffer[..], 2).unwrap();
+        let message =
+            <BinaryProtocolPacket as DecodeRaw>::from_be_bytes(&mut &raw_buffer[..], 2).unwrap();
 
         assert_eq!(message.message_id, SshMessageID::KexInit);
         assert_eq!(message.packet_length, 6);

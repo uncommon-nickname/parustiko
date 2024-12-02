@@ -1,5 +1,5 @@
 mod binary_packet;
-mod message_ids;
+pub mod message_ids;
 
 use crate::errors::BppError;
 use message_ids::SshMessageID;
@@ -35,5 +35,5 @@ pub trait DecodeRaw {
     type Entity;
 
     // Construct the entity from readable buffer.
-    fn from_be_bytes<R: Read>(buffer: R, mac_size: u8) -> Result<Self::Entity, BppError>;
+    fn from_be_bytes<R: Read>(buffer: &mut R, mac_size: u8) -> Result<Self::Entity, BppError>;
 }

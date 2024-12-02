@@ -12,3 +12,21 @@ pub enum BppError {
     #[error("entity preconditions are not met: ({0})")]
     InvalidEntity(&'static str),
 }
+
+#[derive(Debug, Error)]
+pub enum VersionExchangeError {
+    #[error("Proto version incorrect - {0}")]
+    InvalidProtoVersion(&'static str),
+
+    #[error("{0}")]
+    InvalidString(&'static str),
+
+    #[error("{0}")]
+    InvalidSshMsgFormat(&'static str),
+
+    #[error("{0}")]
+    EmptyStream(String),
+
+    #[error("{0}")]
+    OffsetOutOfRange(&'static str),
+}
